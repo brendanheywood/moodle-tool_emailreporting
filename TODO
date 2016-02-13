@@ -1,0 +1,35 @@
+
+create table
+id
+messageid
+fromlocal
+fromdomain
+tolocal
+todomain
+subject
+
+courseid
+cmid
+moodlesystem = message type, or file+line
+
+sentdate
+sentstatus blocked | sentunknown | delayed | rejected | bounced
+
+openedon
+agent
+agentsummary
+
+clickedon
+urlclicked
+
+
+track emails blokced inside email_to_user
+track emails gone to post fix
+track emails failed at postfix
+track emails opened in inbox
+ - create beacon service
+ - create email filter
+track emails click on
+ - create incoming tracking code (redirect service)
+
+
