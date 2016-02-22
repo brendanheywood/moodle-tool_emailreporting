@@ -19,11 +19,18 @@
  *
  * @package    tool_emailreporting
  * @copyright  Brendan Heywood <brendan@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-class core_moodlelib_testcase extends advanced_testcase {
+/**
+ * Tests
+ *
+ * @copyright  Brendan Heywood <brendan@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class tool_emailreporting_locallib_testcase extends advanced_testcase {
 
     /**
      * Parse email Message ids.

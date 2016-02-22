@@ -103,9 +103,9 @@ $stats = array(
  * be then the email html body will be rewritten to add open
  * and click tracking links.
  *
- * @param $messageid a MessageId even if not sent
- * @param $html the email body
- * @return $mail object
+ * @param string $messageid a MessageId even if not sent
+ * @param string $html the email body
+ * @return string the rewritten email body
  */
 function tool_emailreporting_rewrite_email($messageid, $html) {
 
@@ -132,6 +132,9 @@ function tool_emailreporting_rewrite_email($messageid, $html) {
 
 /**
  * Parse a MessageID into component parts
+ *
+ * @param string $messageid a MessageId even if not sent
+ * @return array of parsed message id components
  */
 function tool_emailreporting_parse_messageid($messageid) {
 
@@ -150,12 +153,14 @@ function tool_emailreporting_parse_messageid($messageid) {
 /**
  * Create a new email tracking record
  *
- * @param 
+ * @param integer $state a state
+ * @param phpmailer $mail a mail object
  */
 function tool_emailreporting_set_state($state, $mail) {
 
     global $DB;
     // e($mail->Sender);
+    // TODO should we log who the email is from, or the sender, if different?
 
     preg_match('/^(.*)@(.*)$/', $mail->getToAddresses()[0][0], $to);
     preg_match('/^(.*)@(.*)$/', $mail->From, $from);
@@ -185,6 +190,13 @@ function tool_emailreporting_set_state($state, $mail) {
 
 }
 
+/**
+ * Advance an email state to a higher level
+ *
+ * @param string $messageid a MessageId local part
+ * @param integer $state a state
+ * @param arrary $update other fields to set for the email record
+ */
 function tool_emailreporting_advance_state($messageid, $state, $update = null) {
 
     global $DB;
@@ -199,14 +211,14 @@ function tool_emailreporting_advance_state($messageid, $state, $update = null) {
             }
             // We only ever advance the email state, can't go back!
             $record->state = $state;
-            // TODO array merge for update
             $record->lastmod = time();
             $DB->update_record('tool_emailreporting_log', $record);
-            error_log('ok');
+        } else {
+            // If the state doesn't advance then do nothing.
         }
 
     } else {
-        // Weird.
+        // Should never happen.
     }
 }
 
