@@ -24,3 +24,7 @@
 
 $string['pluginname'] = 'Email reporting';
 
+$string['queued'] = 'Queued';   // State 10.
+$string['beaconseen'] = 'Seen'; // State 80.
+$string['clicked'] = 'Clicked'; // State 90.
+

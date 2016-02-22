@@ -35,7 +35,20 @@ $fromdomain = optional_param('fd',   '', PARAM_RAW);
 $todomain   = optional_param('td',   '', PARAM_RAW);
 $agent      = optional_param('a',    '', PARAM_RAW);
 
+$PAGE->requires->css('/admin/tool/emailreporting/styles.css');
 echo $OUTPUT->header();
 
-echo 'erheth';
+$sql = "
+    SELECT count(l.state),
+           l.state
+      FROM {tool_emailreporting_log} l
+  GROUP BY l.state
+";
+
+$states = $DB->get_records_sql($sql);
+$output = $PAGE->get_renderer('tool_emailreporting');
+echo "<div class='tool_emailreporting'>";
+echo $output->render_states($states);
+echo "</div>";
 echo $OUTPUT->footer();
+

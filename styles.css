@@ -1,0 +1,31 @@
+
+.tool_emailreporting {
+
+}
+
+.tool_emailreporting .statebar {
+    background: #999;
+    white-space: nowrap;
+}
+.tool_emailreporting .statebar > * {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 100%;
+    box-sizing: border-box;
+    padding-left: 4px;
+    border-left: 1px solid #666;
+}
+
+.tool_emailreporting .statebar .unknown {
+    background: #aba;
+}
+
+.tool_emailreporting .statebar .beaconseen {
+    background: #7d8;
+}
+
+.tool_emailreporting .statebar .clicked {
+    background: #3b0;
+}
+

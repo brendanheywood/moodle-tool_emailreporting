@@ -50,7 +50,7 @@ define('EMAIL_TRACKING_CLICKED',                90);
 // do not guarantee that all emails will be reported on. All states are
 // purposefully spaced apart so that future intermediate states can be added.
 //
-$states = array(
+$email_states = array(
 
     // TODO
     // The email couldn't be sent as something is configured incorrectly.
@@ -241,7 +241,7 @@ function tool_emailreporting_advance_state($messageid, $state, $update = null) {
 
     if ($record) {
 
-        if ($state >= $record->state) {
+        if ($state > $record->state) {
             if ($update) {
                 $record = (object)array_merge((array)$record, $update);
             }
