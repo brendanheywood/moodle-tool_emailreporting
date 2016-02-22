@@ -26,7 +26,8 @@ $string['pluginname'] = 'Email reporting';
 
 $string['config'] = 'Config error'; // State  0.
 $string['queued'] = 'Queued';       // State 10.
-$string['smtpfail'] = 'SMTP Fail';  // State 40.
-$string['beaconseen'] = 'Seen';     // State 80.
+$string['smtpsent'] = 'Sent';       // State 40.
+$string['smtpfail'] = 'SMTP Fail';  // State 50.
+$string['beaconseen'] = 'Opened';   // State 80.
 $string['clicked'] = 'Clicked';     // State 90.
 

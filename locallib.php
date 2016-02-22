@@ -26,8 +26,8 @@ defined('MOODLE_INTERNAL') || die();
 
 define('EMAIL_TRACKING_CONFIG',                 10);
 define('EMAIL_TRACKING_QUEUED',                 20);
-define('EMAIL_TRACKING_SMTP_FAIL',              40);
-define('EMAIL_TRACKING_SMTP_SENT',              50);
+define('EMAIL_TRACKING_SMTP_SENT',              40);
+define('EMAIL_TRACKING_SMTP_FAIL',              50);
 define('EMAIL_TRACKING_BOUNCED',                60);
 define('EMAIL_TRACKING_BEACON_SEEN_REFERENCED', 70);
 define('EMAIL_TRACKING_BEACON_SEEN',            80);
@@ -52,7 +52,6 @@ define('EMAIL_TRACKING_CLICKED',                90);
 //
 $email_states = array(
 
-    // TODO
     // The email couldn't be sent as something is configured incorrectly.
     // This is critical as all emails are affected.
     EMAIL_TRACKING_CONFIG => array(
@@ -73,23 +72,24 @@ $email_states = array(
 
     // Smtp_delayed.
 
-    // TODO
-    // We have received defintey feedback that STMP delivery failed, either
+    // We have received definitely feedback that STMP delivery worked, either
     // because Moodle made the SMTP connection itself, or the MTA has been
     // setup to provide feedback to moodle.
+    EMAIL_TRACKING_SMTP_SENT => array(
+        'smtpsent',
+        'unknown',
+    ),
+
+    // We have received defintey feedback that STMP delivery failed, either
+    // because Moodle made the SMTP connection itself, or the MTA has been
+    // setup to provide feedback to moodle. Even if using SMTP directly
+    // very few emails will fail, they will be sent into the wild and await
+    // a bounce reply.
     EMAIL_TRACKING_SMTP_FAIL => array(
         'smtpfail',
         'fail',
     ),
 
-    // TODO
-    // We have received defintey feedback that STMP delivery worked, either
-    // because Moodle made the SMTP connection itself, or the MTA has been
-    // setup to provide feedback to moodle.
-    EMAIL_TRACKING_SMTP_SENT => array(
-        'smtpass',
-        'unknown',
-    ),
 
     // TODO
     // The email was sent and a bounce message was returned. This requires
