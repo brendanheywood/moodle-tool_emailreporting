@@ -17,8 +17,18 @@
     border-left: 1px solid #666;
 }
 
-.tool_emailreporting .statebar .unknown {
+.tool_emailreporting .statebar .config {
+    background: purple;
+    color: white;
+}
+
+.tool_emailreporting .statebar .queued {
     background: #aba;
+}
+
+.tool_emailreporting .statebar .smtpfail {
+    background: red;
+    color: white;
 }
 
 .tool_emailreporting .statebar .beaconseen {

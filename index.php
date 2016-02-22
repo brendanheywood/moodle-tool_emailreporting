@@ -39,8 +39,8 @@ $PAGE->requires->css('/admin/tool/emailreporting/styles.css');
 echo $OUTPUT->header();
 
 $sql = "
-    SELECT count(l.state),
-           l.state
+    SELECT l.state,
+           count(l.state)
       FROM {tool_emailreporting_log} l
   GROUP BY l.state
 ";

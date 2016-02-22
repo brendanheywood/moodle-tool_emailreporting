@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-define('EMAIL_TRACKING_CONFIG',                  0);
-define('EMAIL_TRACKING_QUEUED',                 10);
+define('EMAIL_TRACKING_CONFIG',                 10);
+define('EMAIL_TRACKING_QUEUED',                 20);
 define('EMAIL_TRACKING_SMTP_FAIL',              40);
 define('EMAIL_TRACKING_SMTP_SENT',              50);
 define('EMAIL_TRACKING_BOUNCED',                60);
@@ -56,8 +56,8 @@ $email_states = array(
     // The email couldn't be sent as something is configured incorrectly.
     // This is critical as all emails are affected.
     EMAIL_TRACKING_CONFIG => array(
-        'queued',
-        'critical',
+        'config',
+        'fail',
     ),
 
     // Failed_invalid.
