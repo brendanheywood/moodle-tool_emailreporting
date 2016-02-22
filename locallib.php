@@ -97,22 +97,25 @@ $stats = array(
 
 
 /**
- * Gives a $status object toadd to the log table and an email
+ * Given the html email body rewrite any links and add a tracking beacon
  *
  * The $mail object may not have actually been sent. If it will
  * be then the email html body will be rewritten to add open
  * and click tracking links.
  *
- * @param $status stdObject which must contain a MessageId even if not sent
+ * @param $messageid a MessageId even if not sent
+ * @param $html the email body
  * @return $mail object
  */
 function tool_emailreporting_rewrite_email($messageid, $html) {
+
+    $parts = tool_emailreporting_parse_messageid($messageid);
 
     $dom = new DOMDocument;
     $dom->loadHTML($html);
     foreach ($dom->getElementsByTagName('a') as $node) {
         $link = new moodle_url($node->getAttribute('href'));
-        $link->params(array('msgid' => $messageid));
+        $link->params(array('msgid' => $parts['msgid']));
         $node->setAttribute('href', $link->out(false));
 
     }
@@ -121,10 +124,27 @@ function tool_emailreporting_rewrite_email($messageid, $html) {
     // e($html);
 
     // Add the tracking beacon.
-    $beacon = new moodle_url('/admin/tool/emailreporting/pix.php', array('m' => $messageid));
+    $beacon = new moodle_url('/admin/tool/emailreporting/pix.php', array('m' => $parts['msgid']));
     $html .= "<img width=0 height=0 src='$beacon' />";
 
     return $html;
+}
+
+/**
+ * Parse a MessageID into component parts
+ */
+function tool_emailreporting_parse_messageid($messageid) {
+
+    preg_match('/^<?([^\/+]*)(\/.*?)?@(.*)>$/', $messageid, $match);
+
+    $parts = array(
+        'msgid' => $match[1],
+        'path' => $match[2],
+        'domain' => $match[3],
+        'wwwroot' => '://' . $match[3] . $match[2],
+    );
+
+    return $parts;
 }
 
 /**
@@ -139,7 +159,8 @@ function tool_emailreporting_set_state($state, $mail) {
 
     preg_match('/^(.*)@(.*)$/', $mail->getToAddresses()[0][0], $to);
     preg_match('/^(.*)@(.*)$/', $mail->From, $from);
-    preg_match('/^<?(.*)@(.*)$/', $mail->MessageID, $msgid);
+
+    $parts = tool_emailreporting_parse_messageid($mail->MessageID);
 
     $record = (object) array(
         'state' => $state,
@@ -149,7 +170,7 @@ function tool_emailreporting_set_state($state, $mail) {
         'todomain' => $to[2],
         'fromlocal' => $from[1],
         'fromdomain' => $from[2],
-        'msgid' => $msgid[1],
+        'msgid' => $parts['msgid'],
         'subject' => $mail->Subject,
         'html' => empty($mail->AltBody) ? 0 : 1,
     );
@@ -167,11 +188,6 @@ function tool_emailreporting_set_state($state, $mail) {
 function tool_emailreporting_advance_state($messageid, $state, $update = null) {
 
     global $DB;
-
-    preg_match('/^<?(.*)@(.*)>$/', $messageid, $matches);
-    $domain = $matches[2];
-    $messageid = $matches[1];
-    // e($domain); TODO validate domain
 
     $record = $DB->get_record('tool_emailreporting_log', array('msgid' => $messageid));
 
