@@ -24,13 +24,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-
+define('EMAIL_TRACKING_CONFIG',                  0);
 define('EMAIL_TRACKING_QUEUED',                 10);
 define('EMAIL_TRACKING_SMTP_FAIL',              40);
+define('EMAIL_TRACKING_SMTP_SENT',              50);
+define('EMAIL_TRACKING_BOUNCED',                60);
 define('EMAIL_TRACKING_BEACON_SEEN_REFERENCED', 70);
 define('EMAIL_TRACKING_BEACON_SEEN',            80);
-
-
+define('EMAIL_TRACKING_CLICKED',                90);
 
 // The idea behind this is that an email travels through a linear state machine.
 // At different points a metric may determine that a particular state has been
@@ -38,63 +39,99 @@ define('EMAIL_TRACKING_BEACON_SEEN',            80);
 // are not nessesarily 'better', but generally are more 'certain' as to wether
 // they are a defintely failure or a definte action.
 //
-// As a general rule some states like 'smtp_failed' would never be progressed
-// to a higher level.
+// As a general rule most failure states like 'smtp_failed' would never be
+// progressed to a higher level, but some like a soft SMTP fail due to a mail
+// box quota being exceeded, or graylisting, may be temporary and later move
+// to a higher state.
 //
-$stats = array(
+// A large conceptual number of states will be added here, but not all of them
+// will have a known way to detect them, or in cases where a metric is known
+// it may not have been implemented yet. Some such as DMARC forensic reporting
+// do not guarantee that all emails will be reported on. All states are
+// purposefully spaced apart so that future intermediate states can be added.
+//
+$states = array(
 
-    // failed_invalid
-    // failed_config
-    //
-    // failed_bounce_threshold
-    //
-    // ....?
-    //
-    // queued
+    // TODO
+    // The email couldn't be sent as something is configured incorrectly.
+    // This is critical as all emails are affected.
+    EMAIL_TRACKING_CONFIG => array(
+        'queued',
+        'critical',
+    ),
+
+    // Failed_invalid.
+    // Failed_bounce_threshold.
+
+    // An email has been sent to an MTA or MSA, we know it has been queued
+    // but processing is done asynconously and we may not get an SMTP result
+    // unless feedback from the MTA is given back to moodle.
     EMAIL_TRACKING_QUEUED => array(
-        'queued', // lang pack
-        'unknown', // color
+        'queued',
+        'unknown',
     ),
-    //
-    // smtp_delayed
-    //
-    // smtp_sent <- log process or smtp result
-    //
-    // smtp_failed
-    EMAIL_TRACKING_SMTP_FAIL => array(
-        'smtpfail', // lang pack
-        'fail', // color
-    ),
-    //
-    // bounced - bounce processing - incoming / VERP
-    //
-    // spf / dkim /dmarc failure - dmarc forensic report processing via VERP
-    //
-    // delivered into quarantine - no known metric
-    //
-    // inbox but then marked as spam - feedback loop (not metric yet, possibly 3rd party mta tools)
-    //
 
-    // html_opened_related - if you have 10 emails in a thread an open the last one, flag the others in the thread
-    //                       as having a 'related' email opened
+    // Smtp_delayed.
+
+    // TODO
+    // We have received defintey feedback that STMP delivery failed, either
+    // because Moodle made the SMTP connection itself, or the MTA has been
+    // setup to provide feedback to moodle.
+    EMAIL_TRACKING_SMTP_FAIL => array(
+        'smtpfail',
+        'fail',
+    ),
+
+    // TODO
+    // We have received defintey feedback that STMP delivery worked, either
+    // because Moodle made the SMTP connection itself, or the MTA has been
+    // setup to provide feedback to moodle.
+    EMAIL_TRACKING_SMTP_SENT => array(
+        'smtpass',
+        'unknown',
+    ),
+
+    // TODO
+    // The email was sent and a bounce message was returned. This requires
+    // moodle bounce processing to be configured.
+    EMAIL_TRACKING_BOUNCED => array(
+        'bounced',
+        'fail',
+    ),
+
+    // SPF / dkim /dmarc failure - dmarc forensic report processing via VERP.
+    //
+    // Delivered into quarantine - no known metric.
+    //
+    // Inbox but then marked as spam - feedback loop (not metric yet, possibly
+    // 3rd party mta tools).
+
+    // TODO
+    // If you received a batch of emails which are threaded, such as some forum
+    // emails, you may simple click on the most recent, then click on a url in
+    // it to view the thread online. Conceptually we can related this group of
+    // emails and mark all of them as having been seen.
     EMAIL_TRACKING_BEACON_SEEN_REFERENCED => array(
         'beaconseenreferenced',
         'success',
     ),
 
+    // Triggered when an html email is opened and images are turned on in the email client.
     EMAIL_TRACKING_BEACON_SEEN => array(
         'beaconseen',
         'success',
     ),
-    //
-    // html_opened
-    //
-    // html_clicked
-    //
-    // moodle_seen <- url? maybe too hard, means we have to parse out a url and store, which url if many? what if no url?
+
+    // This is triggered when any link in an html email is clicked. We are
+    // generally not too concerned with what the link was, that can be easily
+    // tracked in other places, but if images are off in the email client but
+    // they still click on a link, then we know the email was opened.
+    EMAIL_TRACKING_CLICKED => array(
+        'clicked',
+        'success',
+    ),
 
 );
-
 
 /**
  * Given the html email body rewrite any links and add a tracking beacon
@@ -111,17 +148,20 @@ function tool_emailreporting_rewrite_email($messageid, $html) {
 
     $parts = tool_emailreporting_parse_messageid($messageid);
 
+    // Rewrite html to add click tracking to outgoing links.
     $dom = new DOMDocument;
     $dom->loadHTML($html);
     foreach ($dom->getElementsByTagName('a') as $node) {
         $link = new moodle_url($node->getAttribute('href'));
-        $link->params(array('msgid' => $parts['msgid']));
-        $node->setAttribute('href', $link->out(false));
+        $murl = new moodle_url('/admin/tool/emailreporting/click.php', array(
+            'msgid' => $parts['msgid'],
+            'go' => $link,
+        ));
+
+        $node->setAttribute('href', $murl->out(false));
 
     }
     $html = $dom->saveHtml();
-    // Rewrite html to add outgoing links
-    // e($html);
 
     // Add the tracking beacon.
     $beacon = new moodle_url('/admin/tool/emailreporting/pix.php', array('m' => $parts['msgid']));
@@ -159,7 +199,7 @@ function tool_emailreporting_parse_messageid($messageid) {
 function tool_emailreporting_set_state($state, $mail) {
 
     global $DB;
-    // e($mail->Sender);
+    // E mail->Sender ;
     // TODO should we log who the email is from, or the sender, if different?
 
     preg_match('/^(.*)@(.*)$/', $mail->getToAddresses()[0][0], $to);
@@ -180,11 +220,7 @@ function tool_emailreporting_set_state($state, $mail) {
         'html' => empty($mail->AltBody) ? 0 : 1,
     );
 
-        // <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-        // <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-        // <FIELD NAME="system" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Moodle message system or file path"/>
-
-    // e($record);
+    // TODO add course and cmid and message system tracking.
 
     $DB->insert_record('tool_emailreporting_log', $record);
 
@@ -213,13 +249,7 @@ function tool_emailreporting_advance_state($messageid, $state, $update = null) {
             $record->state = $state;
             $record->lastmod = time();
             $DB->update_record('tool_emailreporting_log', $record);
-        } else {
-            // If the state doesn't advance then do nothing.
         }
-
-    } else {
-        // Should never happen.
     }
 }
-
 
