@@ -7,24 +7,23 @@
     <TABLE NAME="tool_emailreporting_log" COMMENT="Raw email tracking table">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="msgid" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The email message Id header"/>
-        <FIELD NAME="fromlocal" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The local part of the from email"/>
-        <FIELD NAME="fromdomain" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The domain part of the from email"/>
-        <FIELD NAME="tolocal" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The local part of the to email"/>
-        <FIELD NAME="todomain" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The domain part of the to email"/>
+        <FIELD NAME="state" TYPE="int" LENGTH="6" NOTNULL="true" SEQUENCE="false" COMMENT="Email state"/>
+        <FIELD NAME="created" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Create timestamp"/>
+        <FIELD NAME="lastmod" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Last modified timestamp"/>
+        <FIELD NAME="msgid" TYPE="char" LENGTH="980" NOTNULL="true" SEQUENCE="false" COMMENT="The email Message ID header"/>
+        <FIELD NAME="refmsgid" TYPE="char" LENGTH="980" NOTNULL="false" SEQUENCE="false" COMMENT="The root email Message ID header"/>
+        <FIELD NAME="fromlocal" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The local part of the from email"/>
+        <FIELD NAME="fromdomain" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The domain part of the from email"/>
+        <FIELD NAME="tolocal" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The local part of the to email"/>
+        <FIELD NAME="todomain" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The domain part of the to email"/>
         <FIELD NAME="subject" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Email subject"/>
+        <FIELD NAME="html" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Is body html"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="system" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Moodle system"/>
-
-        <FIELD NAME="sendtime" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="sendstatus" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Sent status"/>
-
-        <FIELD NAME="openedtime" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-
-        <FIELD NAME="clicktime" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="system" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Moodle message system or file path"/>
+        <FIELD NAME="seen" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Beacon seen timestamp"/>
+        <FIELD NAME="clicked" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Links clicked timestamp"/>
         <FIELD NAME="clickurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Url in email clicked"/>
-
         <FIELD NAME="agentua" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Useragent"/>
         <FIELD NAME="agentreferrer" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Referrer"/>
         <FIELD NAME="agentsummary" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Agent summary"/>

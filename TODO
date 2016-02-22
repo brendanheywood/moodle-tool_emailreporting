@@ -23,6 +23,9 @@ clickedon
 urlclicked
 
 
+MAYBE track references ID - if we 'open' a messageid should we also cascase this to any other prior messages in the same thread? this will eliminate a lot of false negatives in threaded emails
+
+
 track emails blokced inside email_to_user
 track emails gone to post fix
 track emails failed at postfix
